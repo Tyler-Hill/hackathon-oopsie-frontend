@@ -11,7 +11,7 @@ function App() {
   }, []);
 
   async function fetchMessages() {
-    const response = await axios.get("/api/messages");
+    const response = await axios.get("http://localhost:8001/api/messages");
     setMessages(response.data);
   }
 
@@ -25,7 +25,8 @@ function App() {
     });
 
     const responseData = await response.json();
-    return responseData.message;
+    const newMessage = responseData.message;
+    setMessages([...messages, { id: messages.length + 1, text: userInput }, { id: messages.length + 2, text: newMessage }]);
   }
 
   return (

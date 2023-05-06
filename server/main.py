@@ -11,7 +11,7 @@ load_dotenv()
 openai.api_key = os.environ["openai_key"]
 
 conversation_history = [
-    {"role": "assistant", "content": " The order is late - what would you like to do? "}
+    {"id": 1, "text": "The order is late - what would you like to do?"}
 ]
 
 found_definitions = False
@@ -100,20 +100,49 @@ class WebhookHandler(BaseHTTPRequestHandler):
         user_input = post_data.get("message")
 
         # Add the user input to the conversation history
-        conversation_history.append({"role": "user", "content": user_input})
+        conversation_history.append(
+            {"id": len(conversation_history) + 1, "text": user_input}
+        )
 
         # Generate the assistant's response
         assistant_response = retrieve_tool_and_params_definition(conversation_history)
         conversation_history.append(
-            {"role": "assistant", "content": assistant_response}
+            {"id": len(conversation_history) + 1, "text": assistant_response}
         )
 
         # Send the assistant's response to the frontend
         self._send_response({"message": assistant_response})
 
 
+class MessagesHandler(BaseHTTPRequestHandler):
+    def _send_response(self, messages):
+        self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+        self.wfile.write(bytes(json.dumps(messages), "utf8"))
+
+    def do_GET(self):
+        if self.path == "/api/messages":
+            self._send_response(conversation_history)
+
+
 if __name__ == "__main__":
-    server_address = ("", 8001)  # listens on all IPs, port 8000
-    httpd = HTTPServer(server_address, WebhookHandler)
-    print("Running server...")
-    httpd.serve_forever()
+    server_address = ("0.0.0.0", 8001)  # listens on all IPs, port 8001
+
+    class CustomHTTPServer(HTTPServer):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.RequestHandlerClass.protocol_version = "HTTP/1.0"
+
+        def finish_request(self, request, client_address):
+            if request.path == "/api/messages":
+                self.RequestHandlerClass = MessagesHandler
+            else:
+                self.RequestHandlerClass = WebhookHandler
+            super().finish_request(request, client_address)
+
+
+httpd = CustomHTTPServer(server_address)
+
+print("Running server...")
+httpd.serve_forever()
