@@ -3,15 +3,20 @@ import json
 from dotenv import load_dotenv
 import os
 import openai
-import os
-from tools import pick_tool, extract_tool_parameters
+from tools import *
 
 load_dotenv()
 
 openai.api_key = os.environ["openai_key"]
 
+if openai.api_key is None:
+    print(
+        "Error: OpenAI API key not found. Please make sure it is defined in a .env file in the root directory."
+    )
+    exit(1)
+
 conversation_history = [
-    {"id": 1, "text": "The order is late - what would you like to do?"}
+    {"role": "system", "content": "The order is late - what would you like to do?"}
 ]
 
 found_definitions = False
@@ -36,9 +41,7 @@ parameters_definition = definitions[1].strip()
 print("Tool Name:", tool_name)
 print("Parameters Definition:", parameters_definition)
 
-
 print(conversation_history)
-
 
 tool = pick_tool(conversation_history)
 
@@ -100,14 +103,12 @@ class WebhookHandler(BaseHTTPRequestHandler):
         user_input = post_data.get("message")
 
         # Add the user input to the conversation history
-        conversation_history.append(
-            {"id": len(conversation_history) + 1, "text": user_input}
-        )
+        conversation_history.append({"role": "user", "content": user_input})
 
         # Generate the assistant's response
         assistant_response = retrieve_tool_and_params_definition(conversation_history)
         conversation_history.append(
-            {"id": len(conversation_history) + 1, "text": assistant_response}
+            {"role": "assistant", "content": assistant_response}
         )
 
         # Send the assistant's response to the frontend
