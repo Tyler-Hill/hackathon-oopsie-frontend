@@ -1,9 +1,12 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
+from dotenv import load_dotenv
+import os
 import openai
 import os
 from tools import pick_tool, extract_tool_parameters
 
+load_dotenv()
 
 openai.api_key = os.environ["openai_key"]
 
@@ -94,19 +97,19 @@ class WebhookHandler(BaseHTTPRequestHandler):
         post_data = json.loads(post_data)
 
         # Extract relevant information from the JSON data
-        action = post_data.get("action")
-        tool_params = post_data.get("tool_params", {})
+        user_input = post_data.get("message")
 
-        # Call the appropriate function based on the action
-        tool = pick_tool([{"role": "user", "content": action}])
-        result = None
+        # Add the user input to the conversation history
+        conversation_history.append({"role": "user", "content": user_input})
 
-        if tool:
-            result = tool(**tool_params)
-        else:
-            result = {"error": "No matching tool found."}
+        # Generate the assistant's response
+        assistant_response = retrieve_tool_and_params_definition(conversation_history)
+        conversation_history.append(
+            {"role": "assistant", "content": assistant_response}
+        )
 
-        self._send_response(result)
+        # Send the assistant's response to the frontend
+        self._send_response({"message": assistant_response})
 
 
 if __name__ == "__main__":

@@ -15,23 +15,17 @@ function App() {
     setMessages(response.data);
   }
 
-  async function postMessage(messageText) {
-    const [action, ...params] = messageText.split(" ");
-    const tool_params = {}; // Initialize an empty object to store the parameters
-
-    // Process the params and add them to the tool_params object
-    params.forEach((param) => {
-      const [key, value] = param.split(":");
-      tool_params[key] = value;
+  async function postMessage(userInput) {
+    const response = await fetch("http://localhost:8001", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: userInput }),
     });
 
-    const response = await axios.post("/api/action", {
-      action: action,
-      tool_params: tool_params,
-    });
-
-    // Update the messages state with the new message
-    setMessages([...messages, { id: messages.length, text: messageText }]);
+    const responseData = await response.json();
+    return responseData.message;
   }
 
   return (
