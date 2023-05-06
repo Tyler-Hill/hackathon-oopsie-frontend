@@ -16,17 +16,23 @@ function App() {
   }
 
   async function postMessage(userInput) {
-    const response = await fetch("http://localhost:8001", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ message: userInput }),
-    });
+    let newMessages;
+    if (messages.length === 0) {
+      newMessages = [{ id: 1, text: "Please start the conversation by typing a message." }];
+    } else {
+      const response = await fetch("http://localhost:8001", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: userInput }),
+      });
 
-    const responseData = await response.json();
-    const newMessage = responseData.message;
-    setMessages([...messages, { id: messages.length + 1, text: userInput }, { id: messages.length + 2, text: newMessage }]);
+      const responseData = await response.json();
+      const newMessage = responseData.message;
+      newMessages = [...messages, { id: messages.length + 1, text: userInput }, { id: messages.length + 2, text: newMessage }];
+    }
+    setMessages(newMessages);
   }
 
   return (
