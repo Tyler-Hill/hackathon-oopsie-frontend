@@ -13,8 +13,9 @@ This project is an interactive web application that enables users to receive not
 
 1. Ensure you have Python 3.7 or later installed.
 2. (Optional) Create a virtual environment using `python -m venv myenv` and activate it with `source myenv/bin/activate` (Linux/Mac) or `myenv\Scripts\activate` (Windows).
-3. Install the required Python packages using `pip install -r requirements.txt` (make sure you have a `requirements.txt` file containing the necessary packages and their versions).
-4. Run the backend server by navigating to the folder containing `main.py` and executing `python main.py`.
+3. Create a .env file in the server directory and add your OpenAI API key as follows: openai_key=YOUR_API_KEY_HERE
+4. Install the required Python packages using `pip install -r requirements.txt`
+5. Run the backend server by navigating to the folder containing `main.py` and executing `python main.py`.
 
 ### Frontend Setup
 
@@ -23,7 +24,7 @@ This project is an interactive web application that enables users to receive not
 3. Install the required packages by running `npm install` (or `yarn install` if you prefer yarn).
 4. Start the frontend development server by running `npm start` (or `yarn start`).
 
-After setting up both the backend and frontend, open a web browser and visit `http://localhost:3000` (assuming the frontend is running on port 3000) to interact with the app.
+After setting up both the backend and frontend, open a web browser and visit `http://localhost:8001` to interact with the app.
 
 ### Project Structure
 
